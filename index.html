@@ -33,9 +33,7 @@
         });
       };
 
-      const performanceLite = window.matchMedia("(max-width: 1100px)").matches
-        || (navigator.hardwareConcurrency || 8) <= 8
-        || (navigator.deviceMemory || 8) < 8;
+      const performanceLite = !new URLSearchParams(window.location.search).has("full");
       window.__portfolioPerformanceLite = performanceLite;
       document.documentElement.classList.toggle("performance-lite", performanceLite);
 
@@ -8175,16 +8173,6 @@
 
   <script>
     (() => {
-      const useDesktopEnhancements = !window.__portfolioPerformanceLite
-        && window.matchMedia("(min-width: 1101px) and (prefers-reduced-motion: no-preference)").matches;
-      if (useDesktopEnhancements) {
-        document.write('<script src="assets/vendor/three.min.js"><\/script>');
-        document.write('<script src="startup-racing-contour.js"><\/script>');
-      }
-    })();
-  </script>
-  <script>
-    (() => {
       "use strict";
 
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -8301,7 +8289,7 @@
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => intro.classList.add("is-fading"));
         });
-        schedule(removeIntro, window.__portfolioPerformanceLite ? 180 : 520);
+        schedule(removeIntro, 180);
       };
 
       const finishIntro = (skipped = false) => {
@@ -8789,16 +8777,9 @@
           return;
         }
 
-        if (prefersReducedMotion || window.__portfolioPerformanceLite) {
-          rememberIntro();
-          fadeIntroOnly("is-reduced");
-          return;
-        }
-
-        if (introWasPlayed()) {
-          fadeIntroOnly("is-repeat");
-          return;
-        }
+        rememberIntro();
+        fadeIntroOnly("is-reduced");
+        return;
 
         if (introArtwork?.dataset.src) {
           introArtwork.src = introArtwork.dataset.src;
@@ -10784,6 +10765,7 @@
       const anchors = Array.from(sphere.querySelectorAll(".orbital-card-anchor"));
       const cards = Array.from(sphere.querySelectorAll(".orbital-card"));
       if (!anchors.length || anchors.length !== cards.length) return;
+      const staticOrbitMode = document.documentElement.classList.contains("performance-lite");
 
       const count = anchors.length;
       const latitudeBands = [-0.58, 0, 0.58];
@@ -10957,6 +10939,7 @@
         lastPointerY = event.clientY;
         lastPointerTime = now;
         if (dragDistance > 3) event.preventDefault();
+        if (staticOrbitMode) renderCards();
       }, { passive: false });
 
       const releaseOrbit = (event) => {
@@ -10991,7 +10974,7 @@
       resizeOrbit();
       updateSelection();
       renderCards();
-      window.requestAnimationFrame(animate);
+      if (!staticOrbitMode) window.requestAnimationFrame(animate);
     })();
   </script>
 </body>
