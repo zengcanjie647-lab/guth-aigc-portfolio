@@ -3128,6 +3128,14 @@
       background: #050505;
     }
 
+    .image-gallery.is-scroll-gallery.is-screen-fit-gallery .image-gallery__scroll-item img {
+      width: auto;
+      max-width: 100%;
+      max-height: min(66dvh, 680px);
+      margin-inline: auto;
+      object-fit: contain;
+    }
+
     .image-gallery__scroll-item figcaption {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
@@ -6130,6 +6138,7 @@
               class="work-card portfolio-project work-card--featured image-work-card work-card--centered-title"
               data-category="portfolio"
               data-gallery-layout="scroll"
+              data-gallery-fit="screen"
               data-gallery='["assets/huuhu/huuhu-01.webp","assets/huuhu/huuhu-02.webp","assets/huuhu/huuhu-03.webp","assets/huuhu/huuhu-04.webp","assets/huuhu/huuhu-05.webp","assets/huuhu/huuhu-06.webp","assets/huuhu/huuhu-07.webp"]'
               data-gallery-captions='["首页 · 主视觉","角色三视图","品牌主视觉","角色表情系统","盲盒包装","周边延展","色彩体系"]'
             >
@@ -6165,6 +6174,7 @@
               class="work-card portfolio-project image-work-card work-card--centered-title"
               data-category="portfolio"
               data-gallery-layout="scroll"
+              data-gallery-fit="screen"
               data-gallery='["assets/honghong/honghong-03.webp","assets/honghong/honghong-01.webp","assets/honghong/honghong-02.webp","assets/honghong/honghong-04.webp","assets/honghong/honghong-05.webp","assets/honghong/honghong-06.webp","assets/honghong/honghong-07.webp"]'
               data-gallery-captions='["首页 · 主视觉","角色三视图","角色表情系统","品牌主视觉","盲盒包装","周边延展","色彩体系"]'
             >
@@ -6197,6 +6207,7 @@
               class="work-card portfolio-project image-work-card work-card--centered-title"
               data-category="portfolio"
               data-gallery-layout="scroll"
+              data-gallery-fit="screen"
               data-gallery='["assets/bobo/bobo-01.webp","assets/bobo/bobo-02.webp","assets/bobo/bobo-03.webp","assets/bobo/bobo-04.webp","assets/bobo/bobo-05.webp","assets/bobo/bobo-06.webp","assets/bobo/bobo-07.webp"]'
               data-gallery-captions='["首页 · 主视觉","品牌主视觉","角色三视图","角色表情系统","盲盒包装","周边延展","色彩体系"]'
             >
@@ -9862,6 +9873,7 @@
 
       const resetGalleryLayout = () => {
         imageGallery?.classList.remove("is-scroll-gallery");
+        imageGallery?.classList.remove("is-screen-fit-gallery");
         if (galleryScroll) {
           galleryScroll.hidden = true;
           galleryScroll.replaceChildren();
@@ -9906,6 +9918,7 @@
           : parseGalleryData(card.dataset.galleryCaptions);
         const tvcMode = card.classList.contains("tvc-project");
         const scrollGalleryMode = card.dataset.galleryLayout === "scroll";
+        const screenFitGalleryMode = card.dataset.galleryFit === "screen";
 
         if (modalTitle) modalTitle.textContent = cardTitle;
         if (modalBackLabel) modalBackLabel.textContent = options.backLabel || "返回作品";
@@ -9961,6 +9974,7 @@
         const imageMode = gallerySources.length > 0;
         if (imageGallery) imageGallery.hidden = !imageMode;
         if (imageGallery) imageGallery.classList.toggle("is-scroll-gallery", imageMode && scrollGalleryMode);
+        if (imageGallery) imageGallery.classList.toggle("is-screen-fit-gallery", imageMode && screenFitGalleryMode);
         if (modalVideo) modalVideo.hidden = imageMode;
         if (videoPlaceholder) videoPlaceholder.hidden = imageMode || hasRealSource;
         if (modalMeta) modalMeta.textContent = imageMode
