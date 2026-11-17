@@ -33,6 +33,12 @@
         });
       };
 
+      const performanceLite = window.matchMedia("(max-width: 1100px)").matches
+        || (navigator.hardwareConcurrency || 8) <= 8
+        || (navigator.deviceMemory || 8) < 8;
+      window.__portfolioPerformanceLite = performanceLite;
+      document.documentElement.classList.toggle("performance-lite", performanceLite);
+
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", openAtHome, { once: true });
       } else {
@@ -41,20 +47,7 @@
     })();
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" media="(min-width: 681px)">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin media="(min-width: 681px)">
   <link rel="preload" as="image" href="assets/profile-avatar.webp" fetchpriority="high">
-  <link rel="preload" as="image" href="startup-racing.jpg" fetchpriority="high" media="(min-width: 681px)">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@600;700;900&display=swap"
-    rel="preload"
-    as="style"
-    media="(min-width: 681px)"
-    onload="this.onload=null;this.rel='stylesheet'"
-  >
-  <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet" media="(min-width: 681px)">
-  </noscript>
 
   <style>
     :root {
@@ -4740,6 +4733,59 @@
       transform: translate3d(0, 0, 0);
     }
 
+    html.performance-lite .ambient-particle-layer,
+    html.performance-lite .grid-overlay,
+    html.performance-lite .hero-exposure-scan,
+    html.performance-lite .hero-atmosphere__canvas {
+      display: none;
+    }
+
+    html.performance-lite .marquee-track,
+    html.performance-lite .recent-sphere,
+    html.performance-lite .rec-dot,
+    html.performance-lite .scroll-cue::before,
+    html.performance-lite .orbital-ring__runner {
+      animation: none !important;
+    }
+
+    html.performance-lite .skills-scroll {
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    html.performance-lite .skills-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    html.performance-lite .skills-track {
+      animation: none !important;
+    }
+
+    html.performance-lite * {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    html.performance-lite .scroll-reveal,
+    html.performance-lite .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+
+    html.performance-lite .work-card,
+    html.performance-lite .workflow-project {
+      transform: none !important;
+      transition: border-color .2s ease, background-color .2s ease !important;
+    }
+
+    html.performance-lite .work-card__interaction-glow {
+      display: none;
+    }
+
     /* Tablet */
     @media (max-width: 1100px) {
       .hero-grid {
@@ -8129,9 +8175,8 @@
 
   <script>
     (() => {
-      const useDesktopEnhancements = window.matchMedia(
-        "(min-width: 681px) and (prefers-reduced-motion: no-preference)"
-      ).matches;
+      const useDesktopEnhancements = !window.__portfolioPerformanceLite
+        && window.matchMedia("(min-width: 1101px) and (prefers-reduced-motion: no-preference)").matches;
       if (useDesktopEnhancements) {
         document.write('<script src="assets/vendor/three.min.js"><\/script>');
         document.write('<script src="startup-racing-contour.js"><\/script>');
@@ -8256,7 +8301,7 @@
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => intro.classList.add("is-fading"));
         });
-        schedule(removeIntro, window.matchMedia("(max-width: 680px)").matches ? 180 : 520);
+        schedule(removeIntro, window.__portfolioPerformanceLite ? 180 : 520);
       };
 
       const finishIntro = (skipped = false) => {
@@ -8744,7 +8789,7 @@
           return;
         }
 
-        if (prefersReducedMotion || window.matchMedia("(max-width: 680px)").matches) {
+        if (prefersReducedMotion || window.__portfolioPerformanceLite) {
           rememberIntro();
           fadeIntroOnly("is-reduced");
           return;
@@ -8850,7 +8895,7 @@
       const magneticInteractiveSelector = "a, button, .work-card, [role='button']";
       const ambientParticleColors = ["#EAF2FF", "#BFD8FF", "#F1D7A0"];
       const magneticRingColors = ["#E9C783", "#F8EEDB", "#DDEBFA"];
-      const magneticLowPower = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+      const magneticLowPower = document.documentElement.classList.contains("performance-lite");
       const magneticRingCount = magneticLowPower ? 12 : 16;
       const particleField = {
         cursorX: -40,
@@ -9203,7 +9248,7 @@
       };
 
       const syncMagneticModes = () => {
-        if (ambientMobileQuery.matches) {
+        if (ambientMobileQuery.matches || magneticLowPower) {
           stopMagneticSystem();
           disableMagneticCursor();
           drawStaticAmbientParticles();
@@ -9221,7 +9266,7 @@
       };
 
       document.addEventListener("pointermove", (event) => {
-        if (ambientMobileQuery.matches) return;
+        if (ambientMobileQuery.matches || magneticLowPower) return;
         particleField.parallaxX = (event.clientX / window.innerWidth - .5) * 7;
         particleField.parallaxY = (event.clientY / window.innerHeight - .5) * 4;
         if (!magneticCursorEnabled || event.pointerType === "touch") return;
@@ -9250,12 +9295,12 @@
       window.addEventListener("resize", () => {
         sizeMagneticCanvases();
         buildAmbientParticles();
-        if (ambientMobileQuery.matches || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
+        if (ambientMobileQuery.matches || magneticLowPower || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
         else startMagneticSystem();
       }, { passive: true });
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) stopMagneticSystem();
-        else if (ambientMobileQuery.matches || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
+        else if (ambientMobileQuery.matches || magneticLowPower || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
         else startMagneticSystem();
       });
       magneticPointerQuery.addEventListener?.("change", syncMagneticModes);
