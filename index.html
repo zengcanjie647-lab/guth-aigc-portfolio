@@ -3714,16 +3714,23 @@
 
     .character-asset img,
     .scene-asset img {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: min(66dvh, 680px);
+      margin-inline: auto;
+      aspect-ratio: auto;
+      object-fit: contain;
       background: #E8E8E8;
       transition: transform .6s var(--ease-out);
     }
 
     .prop-asset img {
-      width: 100%;
+      width: auto;
+      max-width: 100%;
       height: auto;
+      max-height: min(66dvh, 680px);
+      margin-inline: auto;
       object-fit: contain;
       background: #F2F0EC;
       transition: transform .6s var(--ease-out);
