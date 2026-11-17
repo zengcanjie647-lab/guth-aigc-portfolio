@@ -41,18 +41,19 @@
     })();
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" media="(min-width: 681px)">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin media="(min-width: 681px)">
   <link rel="preload" as="image" href="assets/profile-avatar.webp" fetchpriority="high">
   <link rel="preload" as="image" href="startup-racing.jpg" fetchpriority="high" media="(min-width: 681px)">
   <link
     href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@600;700;900&display=swap"
     rel="preload"
     as="style"
+    media="(min-width: 681px)"
     onload="this.onload=null;this.rel='stylesheet'"
   >
   <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet" media="(min-width: 681px)">
   </noscript>
 
   <style>
@@ -4858,6 +4859,26 @@
         --section-space: 84px;
       }
 
+      .ambient-particle-layer,
+      .grid-overlay,
+      .hero-exposure-scan,
+      .hero-atmosphere__canvas {
+        display: none;
+      }
+
+      .marquee-track,
+      .skills-track,
+      .recent-sphere,
+      .rec-dot,
+      .orbital-ring__runner {
+        animation: none !important;
+      }
+
+      * {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+      }
+
       .grid-overlay { background-size: 25% 100%; }
 
       .section-top {
@@ -8235,7 +8256,7 @@
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => intro.classList.add("is-fading"));
         });
-        schedule(removeIntro, 520);
+        schedule(removeIntro, window.matchMedia("(max-width: 680px)").matches ? 180 : 520);
       };
 
       const finishIntro = (skipped = false) => {
@@ -9182,6 +9203,12 @@
       };
 
       const syncMagneticModes = () => {
+        if (ambientMobileQuery.matches) {
+          stopMagneticSystem();
+          disableMagneticCursor();
+          drawStaticAmbientParticles();
+          return;
+        }
         if (magneticReducedMotionQuery.matches) {
           stopMagneticSystem();
           disableMagneticCursor();
@@ -9194,6 +9221,7 @@
       };
 
       document.addEventListener("pointermove", (event) => {
+        if (ambientMobileQuery.matches) return;
         particleField.parallaxX = (event.clientX / window.innerWidth - .5) * 7;
         particleField.parallaxY = (event.clientY / window.innerHeight - .5) * 4;
         if (!magneticCursorEnabled || event.pointerType === "touch") return;
@@ -9222,12 +9250,12 @@
       window.addEventListener("resize", () => {
         sizeMagneticCanvases();
         buildAmbientParticles();
-        if (magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
-        startMagneticSystem();
+        if (ambientMobileQuery.matches || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
+        else startMagneticSystem();
       }, { passive: true });
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) stopMagneticSystem();
-        else if (magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
+        else if (ambientMobileQuery.matches || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
         else startMagneticSystem();
       });
       magneticPointerQuery.addEventListener?.("change", syncMagneticModes);
@@ -10597,6 +10625,7 @@
         }, { passive: true });
 
         record.card.addEventListener("click", (event) => {
+          if (!finePointerQuery.matches) return;
           if (record.allowNextClick) {
             record.allowNextClick = false;
             return;
