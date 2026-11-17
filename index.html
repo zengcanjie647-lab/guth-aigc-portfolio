@@ -33,7 +33,8 @@
         });
       };
 
-      const performanceLite = !new URLSearchParams(window.location.search).has("full");
+      const performanceLite = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        || new URLSearchParams(window.location.search).has("lite");
       window.__portfolioPerformanceLite = performanceLite;
       document.documentElement.classList.toggle("performance-lite", performanceLite);
 
@@ -4903,26 +4904,6 @@
         --section-space: 84px;
       }
 
-      .ambient-particle-layer,
-      .grid-overlay,
-      .hero-exposure-scan,
-      .hero-atmosphere__canvas {
-        display: none;
-      }
-
-      .marquee-track,
-      .skills-track,
-      .recent-sphere,
-      .rec-dot,
-      .orbital-ring__runner {
-        animation: none !important;
-      }
-
-      * {
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
-      }
-
       .grid-overlay { background-size: 25% 100%; }
 
       .section-top {
@@ -8173,6 +8154,15 @@
 
   <script>
     (() => {
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (window.__portfolioPerformanceLite || prefersReducedMotion) return;
+      document.write('<script src="assets/vendor/three.min.js"><\/script>');
+      document.write('<script src="startup-racing-contour.js"><\/script>');
+    })();
+  </script>
+
+  <script>
+    (() => {
       "use strict";
 
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -8289,7 +8279,7 @@
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => intro.classList.add("is-fading"));
         });
-        schedule(removeIntro, 180);
+        schedule(removeIntro, 520);
       };
 
       const finishIntro = (skipped = false) => {
@@ -8777,9 +8767,16 @@
           return;
         }
 
-        rememberIntro();
-        fadeIntroOnly("is-reduced");
-        return;
+        if (prefersReducedMotion || window.__portfolioPerformanceLite) {
+          rememberIntro();
+          fadeIntroOnly("is-reduced");
+          return;
+        }
+
+        if (introWasPlayed()) {
+          fadeIntroOnly("is-repeat");
+          return;
+        }
 
         if (introArtwork?.dataset.src) {
           introArtwork.src = introArtwork.dataset.src;
@@ -9229,7 +9226,7 @@
       };
 
       const syncMagneticModes = () => {
-        if (ambientMobileQuery.matches || magneticLowPower) {
+        if (magneticLowPower) {
           stopMagneticSystem();
           disableMagneticCursor();
           drawStaticAmbientParticles();
@@ -9247,7 +9244,7 @@
       };
 
       document.addEventListener("pointermove", (event) => {
-        if (ambientMobileQuery.matches || magneticLowPower) return;
+        if (magneticLowPower) return;
         particleField.parallaxX = (event.clientX / window.innerWidth - .5) * 7;
         particleField.parallaxY = (event.clientY / window.innerHeight - .5) * 4;
         if (!magneticCursorEnabled || event.pointerType === "touch") return;
@@ -9276,12 +9273,12 @@
       window.addEventListener("resize", () => {
         sizeMagneticCanvases();
         buildAmbientParticles();
-        if (ambientMobileQuery.matches || magneticLowPower || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
+        if (magneticLowPower || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
         else startMagneticSystem();
       }, { passive: true });
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) stopMagneticSystem();
-        else if (ambientMobileQuery.matches || magneticLowPower || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
+        else if (magneticLowPower || magneticReducedMotionQuery.matches) drawStaticAmbientParticles();
         else startMagneticSystem();
       });
       magneticPointerQuery.addEventListener?.("change", syncMagneticModes);
